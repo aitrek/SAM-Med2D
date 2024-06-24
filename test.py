@@ -219,9 +219,9 @@ def main(args):
 
 if __name__ == '__main__':
     args = parse_args()
-    args.device = "cpu"
-    args.encoder_adapter = True
-    args.data_path = "/Users/zhaojq/Datasets/Med2D_BL/CPM17"
-    args.run_name = "Med2D/CPM17"
+    # args.device = "cpu"
+    # args.encoder_adapter = True
+    # args.data_path = "/Users/zhaojq/Datasets/Med2D_BL/CPM17"
+    # args.run_name = "Med2D/CPM17"
     print("args.encoder_adapter: ", args.encoder_adapter)
     main(args)
