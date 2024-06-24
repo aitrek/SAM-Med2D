@@ -36,7 +36,7 @@ def parse_args():
     parser.add_argument("--point_num", type=int, default=1, help="point num")
     parser.add_argument("--iter_point", type=int, default=1, help="iter num") 
     parser.add_argument("--multimask", type=bool, default=True, help="ouput multimask")
-    parser.add_argument("--encoder_adapter", type=bool, default=True, help="use adapter")
+    parser.add_argument("--encoder_adapter", action='store_true', help="use adapter")
     parser.add_argument("--prompt_path", type=str, default=None, help="fix prompt path")
     parser.add_argument("--save_pred", type=bool, default=False, help="save reslut")
     args = parser.parse_args()
@@ -220,4 +220,5 @@ if __name__ == '__main__':
     # args.encoder_adapter = True
     # args.data_path = "/Users/zhaojq/Datasets/Med2D_BL/CPM15"
     # args.run_name = "Med2D"
+    print("args.encoder_adapter: ", args.encoder_adapter)
     main(args)
