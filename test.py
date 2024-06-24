@@ -148,8 +148,8 @@ def main(args):
     all_test_metrics = []
 
     for i, batched_input in enumerate(test_pbar):
-        if i > 20:
-            break
+        # if i > 20:
+        #     break
         batched_input = to_device(batched_input, args.device)
         ori_labels = batched_input["ori_label"]
         original_size = batched_input["original_size"]
@@ -218,7 +218,7 @@ if __name__ == '__main__':
     args = parse_args()
     # args.device = "cpu"
     # args.encoder_adapter = True
-    # args.data_path = "/Users/zhaojq/Datasets/Med2D_BL/CPM15"
-    # args.run_name = "Med2D"
+    # args.data_path = "/Users/zhaojq/Datasets/Med2D_BL/CPM17"
+    # args.run_name = "Med2D/CPM17"
     print("args.encoder_adapter: ", args.encoder_adapter)
     main(args)
