@@ -61,7 +61,7 @@ def to_device(batch_input, device):
 
 
 def postprocess_masks(low_res_masks, image_size, original_size):
-    ori_h, ori_w = original_size
+    ori_h, ori_w = original_size[0].item(), original_size[1].item()
     masks = F.interpolate(
         low_res_masks,
         (image_size, image_size),
@@ -219,9 +219,9 @@ def main(args):
 
 if __name__ == '__main__':
     args = parse_args()
-    # args.device = "cpu"
-    # args.encoder_adapter = True
-    # args.data_path = "/Users/zhaojq/Datasets/Med2D_BL/CPM17"
-    # args.run_name = "Med2D/CPM17"
+    args.device = "cpu"
+    args.encoder_adapter = True
+    args.data_path = "/Users/zhaojq/Datasets/Med2D_BL/CPM17"
+    args.run_name = "Med2D/CPM17"
     print("args.encoder_adapter: ", args.encoder_adapter)
     main(args)
