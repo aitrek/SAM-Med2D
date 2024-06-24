@@ -213,6 +213,9 @@ def main(args):
 
     print("test_result: ", json.dumps(log_data, indent=2))
 
+    with open(os.path.join(args.data_path, "metrics.json"), "w") as f:
+        json.dump(log_data, f, indent=2)
+
 
 if __name__ == '__main__':
     args = parse_args()
