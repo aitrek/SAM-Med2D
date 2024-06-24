@@ -38,9 +38,9 @@ class TestingDataset(Dataset):
         json_file = open(os.path.join(data_path, f'label2image_{mode}.json'), "r")
         dataset = json.load(json_file)
     
-        self.image_paths = list(dataset.values())
-        self.label_paths = list(dataset.keys())
-      
+        self.image_paths = [os.path.join(data_path, _) for _ in dataset.values()]
+        self.label_paths = [os.path.join(data_path, _) for _ in dataset.keys()]
+
         self.pixel_mean = [123.675, 116.28, 103.53]
         self.pixel_std = [58.395, 57.12, 57.375]
     

@@ -6,7 +6,8 @@ import os
 from utils import FocalDiceloss_IoULoss, generate_point, save_masks
 from torch.utils.data import DataLoader
 from DataLoader import TestingDataset
-from metrics import SegMetrics
+# from metrics import SegMetrics
+from metrics_plus import SegMetrics, AggregatedMetrics
 import time
 from tqdm import tqdm
 import numpy as np
@@ -17,6 +18,7 @@ import cv2
 import random
 import csv
 import json
+import wandb
 
 
 def parse_args():
@@ -27,7 +29,7 @@ def parse_args():
     parser.add_argument("--image_size", type=int, default=256, help="image_size")
     parser.add_argument('--device', type=str, default='cuda')
     parser.add_argument("--data_path", type=str, default="data_demo", help="train data path") 
-    parser.add_argument("--metrics", nargs='+', default=['iou', 'dice'], help="metrics")
+    parser.add_argument("--metrics", nargs='+', default=['iou', 'dice', 'precision', 'recall', 'accuracy', 'f1_score', 'specificity', 'aji', 'dq', 'sq', 'pq'], help="metrics")
     parser.add_argument("--model_type", type=str, default="vit_b", help="sam model_type")
     parser.add_argument("--sam_checkpoint", type=str, default="pretrain_model/sam-med2d_b.pth", help="sam checkpoint")
     parser.add_argument("--boxes_prompt", type=bool, default=True, help="use boxes prompt")
@@ -119,7 +121,10 @@ def is_not_saved(save_path, mask_name):
         return True
 
 
+@torch.no_grad()
 def main(args):
+    wandb.init(project="Baseline", name=args.run_name)
+
     print('*'*100)
     for key, value in vars(args).items():
         print(key + ': ' + str(value))
@@ -140,8 +145,11 @@ def main(args):
     test_iter_metrics = [0] * len(args.metrics)
     test_metrics = {}
     prompt_dict = {}
+    all_test_metrics = []
 
     for i, batched_input in enumerate(test_pbar):
+        if i > 20:
+            break
         batched_input = to_device(batched_input, args.device)
         ori_labels = batched_input["ori_label"]
         original_size = batched_input["original_size"]
@@ -149,10 +157,10 @@ def main(args):
         img_name = batched_input['name'][0]
         if args.prompt_path is None:
             prompt_dict[img_name] = {
-                        "boxes": batched_input["boxes"].squeeze(1).cpu().numpy().tolist(),
-                        "point_coords": batched_input["point_coords"].squeeze(1).cpu().numpy().tolist(),
-                        "point_labels": batched_input["point_labels"].squeeze(1).cpu().numpy().tolist()
-                        }
+                "boxes": batched_input["boxes"].squeeze(1).cpu().numpy().tolist(),
+                "point_coords": batched_input["point_coords"].squeeze(1).cpu().numpy().tolist(),
+                "point_labels": batched_input["point_labels"].squeeze(1).cpu().numpy().tolist()
+            }
 
         with torch.no_grad():
             image_embeddings = model.image_encoder(batched_input["image"])
@@ -187,22 +195,29 @@ def main(args):
         loss = criterion(masks, ori_labels, iou_predictions)
         test_loss.append(loss.item())
 
-        test_batch_metrics = SegMetrics(masks, ori_labels, args.metrics)
-        test_batch_metrics = [float('{:.4f}'.format(metric)) for metric in test_batch_metrics]
-
-        for j in range(len(args.metrics)):
-            test_iter_metrics[j] += test_batch_metrics[j]
-  
-    test_iter_metrics = [metric / l for metric in test_iter_metrics]
-    test_metrics = {args.metrics[i]: '{:.4f}'.format(test_iter_metrics[i]) for i in range(len(test_iter_metrics))}
+        seg_metrics = SegMetrics(args.metrics, masks, ori_labels)
+        all_test_metrics.append(seg_metrics.result())
 
     average_loss = np.mean(test_loss)
-    if args.prompt_path is None:
-        with open(os.path.join(args.work_dir,f'{args.image_size}_prompt.json'), 'w') as f:
-            json.dump(prompt_dict, f, indent=2)
-    print(f"Test loss: {average_loss:.4f}, metrics: {test_metrics}")
+
+    agg_metrics = AggregatedMetrics(args.metrics, all_test_metrics)
+    metrics_overall = agg_metrics.aggregate()
+
+    log_data = {}
+    for key, val in metrics_overall.items():
+        log_data[f"{args.run_name}/{key}"] = val
+
+    log_data[f"{args.run_name}/average_loss"] = average_loss
+
+    wandb.log(log_data)
+
+    print("test_result: ", json.dumps(log_data, indent=2))
 
 
 if __name__ == '__main__':
     args = parse_args()
+    # args.device = "cpu"
+    # args.encoder_adapter = True
+    # args.data_path = "/Users/zhaojq/Datasets/Med2D_BL/CPM15"
+    # args.run_name = "Med2D"
     main(args)
