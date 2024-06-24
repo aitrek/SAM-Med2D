@@ -61,7 +61,7 @@ def to_device(batch_input, device):
 
 
 def postprocess_masks(low_res_masks, image_size, original_size):
-    ori_h, ori_w = original_size[0].item(), original_size[1].item()
+    ori_h, ori_w = original_size[0][0].item(), original_size[1][0].item()
     masks = F.interpolate(
         low_res_masks,
         (image_size, image_size),
