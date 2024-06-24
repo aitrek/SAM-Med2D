@@ -75,7 +75,7 @@ def postprocess_masks(low_res_masks, image_size, original_size):
         masks = masks[..., top : ori_h + top, left : ori_w + left]
         pad = (top, left)
     else:
-        masks = F.interpolate(masks, original_size, mode="bilinear", align_corners=False)
+        masks = F.interpolate(masks, (ori_h, ori_w), mode="bilinear", align_corners=False)
         pad = None 
     return masks, pad
 
