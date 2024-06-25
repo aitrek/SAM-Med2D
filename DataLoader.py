@@ -68,11 +68,7 @@ class TestingDataset(Dataset):
         ori_mask = torch.tensor(ori_np_mask).unsqueeze(0)
 
         transforms = train_transforms(self.image_size, h, w)
-        try:
-            augments = transforms(image=image, mask=ori_np_mask)
-        except:
-            print(f"\n************************h = {h}, w = {w}, image.shape = {image.shape}, mask.shape = {ori_np_mask.shape}")
-            raise ValueError("ddddddd")
+        augments = transforms(image=image, mask=ori_np_mask)
         image, mask = augments['image'], augments['mask'].to(torch.int64)
 
         if self.prompt_path is None:
@@ -185,6 +181,7 @@ class TrainingDataset(Dataset):
             return image_input
         else:
             return image_input
+
     def __len__(self):
         return len(self.image_paths)
 
