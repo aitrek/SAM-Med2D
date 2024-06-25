@@ -53,11 +53,8 @@ class TestingDataset(Dataset):
             dict: A dictionary containing the preprocessed image and associated information.
         """
         image_input = {}
-        try:
-            image = cv2.imread(self.image_paths[index])
-            image = (image - self.pixel_mean) / self.pixel_std
-        except:
-            print(self.image_paths[index])
+        image = cv2.imread(self.image_paths[index])
+        image = (image - self.pixel_mean) / self.pixel_std
 
         mask_path = self.label_paths[index]
         ori_np_mask = cv2.imread(mask_path, 0)
