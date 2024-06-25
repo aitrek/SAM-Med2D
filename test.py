@@ -138,7 +138,7 @@ def main(args):
 
     criterion = FocalDiceloss_IoULoss()
     test_dataset = TestingDataset(data_path=args.data_path, image_size=args.image_size, mode='test', requires_name=True, point_num=args.point_num, return_ori_mask=True, prompt_path=args.prompt_path)
-    test_loader = DataLoader(dataset=test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=8)
+    test_loader = DataLoader(dataset=test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=16)
     print('Test data:', len(test_loader))
 
     test_pbar = tqdm(test_loader)
