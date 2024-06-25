@@ -11,6 +11,7 @@ from metrics_plus import SegMetrics, AggregatedMetrics
 import time
 from tqdm import tqdm
 import numpy as np
+import pandas as pd
 from torch.nn import functional as F
 import logging
 import datetime
@@ -123,7 +124,10 @@ def is_not_saved(save_path, mask_name):
 
 @torch.no_grad()
 def main(args):
-    wandb.init(project="Baseline", name=args.run_name)
+    wandb.init(
+        project="Baseline",
+        name=args.run_name + datetime.datetime.now().strftime('%m-%d_%H-%M')
+    )
 
     print('*'*100)
     for key, value in vars(args).items():
@@ -209,12 +213,29 @@ def main(args):
 
     log_data[f"{args.run_name}/average_loss"] = average_loss
 
-    wandb.log(log_data)
+    # wandb.log(log_data, commit=False)
+
+    model_name, dataset_name = args.run_name.split("/")
+    columns = ["Model", "Dataset", "Metric", "Value"]
+    table_data = []
+    for metric, val in metrics_overall.items():
+        table_data.append([model_name, dataset_name, metric, val])
+
+    table = wandb.Table(columns=columns, data=table_data)
+    wandb.log({"Baseline": table})
 
     print("test_result: ", json.dumps(log_data, indent=2))
 
     with open(os.path.join(args.data_path, "metrics.json"), "w") as f:
         json.dump(log_data, f, indent=2)
+
+    df_data = [{"Model": d0, "Dataset": d1, "Metric": d2, "Value": d3}
+               for d0, d1, d2, d3 in table_data]
+    csv_path = os.path.join(os.path.dirname(__file__), "baseline.csv")
+    if not os.path.exists(csv_path):
+        pd.DataFrame(data=df_data).to_csv(csv_path, index=False)
+    else:
+        pd.DataFrame(data=df_data).to_csv(csv_path, index=False, header=False, mode="a")
 
 
 if __name__ == '__main__':
