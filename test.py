@@ -126,7 +126,7 @@ def is_not_saved(save_path, mask_name):
 def main(args):
     wandb.init(
         project="Baseline",
-        name=args.run_name + datetime.datetime.now().strftime('%m-%d_%H-%M')
+        name=args.run_name + "_" + datetime.datetime.now().strftime('%m-%d_%H-%M')
     )
 
     print('*'*100)
