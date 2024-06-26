@@ -77,6 +77,7 @@ def create_test_json(data_root: str, split_path: str, seed: int, test_size: floa
     test_data = split_data["test"]
     json_data = {}
     for img_path, _ in test_data:
+        img_path = os.path.join(data_root, img_path)
         for label_path in get_label_paths(img_path, label_dir):
             json_data[os.path.relpath(label_path, data_root)] = \
                 os.path.relpath(img_path, data_root)
