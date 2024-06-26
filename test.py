@@ -218,8 +218,10 @@ def main(args):
     model_name, dataset_name = args.run_name.split("/")
     columns = ["Model", "Dataset", "Metric", "Value"]
     table_data = []
+    df_data = {"Model": model_name, "Dataset": dataset_name}
     for metric, val in metrics_overall.items():
         table_data.append([model_name, dataset_name, metric, val])
+        df_data[metric] = val
 
     table = wandb.Table(columns=columns, data=table_data)
     wandb.log({"Baseline": table})
@@ -229,13 +231,11 @@ def main(args):
     with open(os.path.join(args.data_path, "metrics.json"), "w") as f:
         json.dump(log_data, f, indent=2)
 
-    df_data = [{"Model": d0, "Dataset": d1, "Metric": d2, "Value": d3}
-               for d0, d1, d2, d3 in table_data]
     csv_path = os.path.join(os.path.dirname(__file__), "baseline.csv")
     if not os.path.exists(csv_path):
-        pd.DataFrame(data=df_data).to_csv(csv_path, index=False)
+        pd.DataFrame(data=[df_data]).to_csv(csv_path, index=False)
     else:
-        pd.DataFrame(data=df_data).to_csv(csv_path, index=False, header=False, mode="a")
+        pd.DataFrame(data=[df_data]).to_csv(csv_path, index=False, header=False, mode="a")
 
 
 if __name__ == '__main__':
