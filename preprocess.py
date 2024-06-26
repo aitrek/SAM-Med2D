@@ -66,13 +66,17 @@ def get_label_paths(img_path: str, label_dir: str, break_max: int = 10) -> List[
     return paths
 
 
-def create_test_json(data_root: str):
-    data_dir = os.path.join(data_root, "data")
+def create_test_json(data_root: str, seed: int, test_size: float):
+    # data_dir = os.path.join(data_root, "data")
     label_dir = os.path.join(data_root, "label")
 
-    img_paths = glob.glob(os.path.join(data_dir, "*.png"))
+    with open(os.path.join(data_root, f"split_seed-{seed}_test_size-{test_size}.json")) as f:
+        split_data = json.load(f)
+
+    # img_paths = glob.glob(os.path.join(data_dir, "*.png"))
+    test_data = split_data["test"]
     json_data = {}
-    for img_path in img_paths:
+    for img_path, _ in test_data:
         for label_path in get_label_paths(img_path, label_dir):
             json_data[os.path.relpath(label_path, data_root)] = \
                 os.path.relpath(img_path, data_root)
@@ -86,6 +90,8 @@ if __name__ == "__main__":
     # exit()
     ori_root = "/root/autodl-tmp/datasets/SAM_nuclei_preprocessed/ALL_Multi"
     dst_root = "/root/autodl-tmp/datasets/SAM_nuclei_preprocessed/ALL_Multi_BL"
+    seed = 42
+    test_size = 0.1
 
     # create json file
     for name in os.listdir(ori_root):
@@ -94,4 +100,4 @@ if __name__ == "__main__":
             print(ori_dataset_dir)
             dst_dataset_dir = os.path.join(dst_root, name)
             create_dataset(ori_dataset_dir, dst_dataset_dir)
-            create_test_json(dst_dataset_dir)
+            create_test_json(dst_dataset_dir, seed, test_size)
