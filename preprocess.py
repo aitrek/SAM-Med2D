@@ -66,9 +66,9 @@ def get_label_paths(img_path: str, label_dir: str, break_max: int = 10) -> List[
     return paths
 
 
-def create_test_json(data_root: str, split_path: str, seed: int, test_size: float):
+def create_test_json(dst_data_root: str, split_path: str):
     # data_dir = os.path.join(data_root, "data")
-    label_dir = os.path.join(data_root, "label")
+    label_dir = os.path.join(dst_data_root, "label")
 
     with open(split_path) as f:
         split_data = json.load(f)
@@ -77,12 +77,12 @@ def create_test_json(data_root: str, split_path: str, seed: int, test_size: floa
     test_data = split_data["test"]
     json_data = {}
     for img_path, _ in test_data:
-        img_path = os.path.join(data_root, img_path)
+        img_path = os.path.join(dst_data_root, img_path)
         for label_path in get_label_paths(img_path, label_dir):
-            json_data[os.path.relpath(label_path, data_root)] = \
-                os.path.relpath(img_path, data_root)
+            json_data[os.path.relpath(label_path, dst_data_root)] = \
+                os.path.relpath(img_path, dst_data_root)
 
-    with open(os.path.join(data_root, "label2image_test.json"), "w") as f:
+    with open(os.path.join(dst_data_root, "label2image_test.json"), "w") as f:
         json.dump(json_data, f)
 
 
@@ -103,4 +103,4 @@ if __name__ == "__main__":
                                       f"split_seed-{seed}_test_size-{test_size}.json")
             dst_dataset_dir = os.path.join(dst_root, name)
             create_dataset(ori_dataset_dir, dst_dataset_dir)
-            create_test_json(dst_dataset_dir, split_path, seed, test_size)
+            create_test_json(dst_dataset_dir, split_path)
