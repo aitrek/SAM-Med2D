@@ -66,11 +66,11 @@ def get_label_paths(img_path: str, label_dir: str, break_max: int = 10) -> List[
     return paths
 
 
-def create_test_json(data_root: str, seed: int, test_size: float):
+def create_test_json(data_root: str, split_path: str, seed: int, test_size: float):
     # data_dir = os.path.join(data_root, "data")
     label_dir = os.path.join(data_root, "label")
 
-    with open(os.path.join(data_root, f"split_seed-{seed}_test_size-{test_size}.json")) as f:
+    with open(split_path) as f:
         split_data = json.load(f)
 
     # img_paths = glob.glob(os.path.join(data_dir, "*.png"))
@@ -98,6 +98,8 @@ if __name__ == "__main__":
         ori_dataset_dir = os.path.join(ori_root, name)
         if os.path.isdir(ori_dataset_dir):
             print(ori_dataset_dir)
+            split_path = os.path.join(ori_dataset_dir,
+                                      f"split_seed-{seed}_test_size-{test_size}.json")
             dst_dataset_dir = os.path.join(dst_root, name)
             create_dataset(ori_dataset_dir, dst_dataset_dir)
-            create_test_json(dst_dataset_dir, seed, test_size)
+            create_test_json(dst_dataset_dir, split_path, seed, test_size)
